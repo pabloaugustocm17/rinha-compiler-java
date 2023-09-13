@@ -1,4 +1,4 @@
-package models;
+package compiler.models;
 
 public class Parameter {
     

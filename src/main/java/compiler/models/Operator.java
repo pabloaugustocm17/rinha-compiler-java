@@ -1,7 +1,7 @@
-package models;
+package compiler.models;
 
 public enum Operator {
-    
+
     ADD("+"),
     SUB("-"),
     MUL("*"),
@@ -16,10 +16,14 @@ public enum Operator {
     AND("&&"),
     OR("||");
 
-    private String value;
+    private final String value;
 
-    Operator(String value){
+    Operator(String value) {
         this.value = value;
+    }
+
+    public String getValue() {
+        return this.value;
     }
 
 }
