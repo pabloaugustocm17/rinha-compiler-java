@@ -13,7 +13,10 @@ class Main {
 
         JsonNode node = interpreter._readArchiveJson(PATH);
 
+        long tempo = System.currentTimeMillis();
+
         interpreter._readJson(node.get("expression"));
 
+        System.out.println("EXEC: " + (System.currentTimeMillis() - tempo));
     }
 }

@@ -6,10 +6,6 @@ import compiler.models.Term;
 
 import java.util.HashMap;
 
-public class PrintFactory implements Factory{
+public class PrintFactory {
 
-    @Override
-    public Object _create(HashMap<String, Object> arguments) {
-        return new Print((Term) arguments.get("value"), (Location) arguments.get("location"));
-    }
 }
