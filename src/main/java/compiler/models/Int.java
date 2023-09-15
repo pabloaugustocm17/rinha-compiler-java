@@ -1,11 +1,16 @@
 package compiler.models;
 
 public class Int implements Term {
-    private Integer value;
-    private Location location;
+    private final Integer value;
+    private final Location location;
 
     @Override
     public String toStringCompiler() {
         return value.toString();
+    }
+
+    public Int(Integer value, Location location) {
+        this.value = value;
+        this.location = location;
     }
 }
