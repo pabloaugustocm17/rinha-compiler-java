@@ -2,14 +2,17 @@ package compiler.actions;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import compiler.annotations.CompilerPrinter;
-import compiler.factories.*;
-import compiler.models.Parameter;
+import compiler.factories.TermFactory;
+import compiler.models.Call;
+import compiler.models.Location;
+import compiler.models.Print;
+import compiler.models.Term;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.HashMap;
+import java.util.LinkedList;
 
 public class Interpreter {
 
@@ -18,12 +21,30 @@ public class Interpreter {
 
     public void _readJson(JsonNode node){
 
-        Stack<JsonNode> nodes = new Stack<>();
-        Stack<Object> objects_process = new Stack<>();
+        TermFactory term_factory = new TermFactory();
 
         String type = node.get("kind").textValue();
 
-        JsonNode node_kind = node.get("kind");
+        HashMap<Location, Object> objects = new HashMap<>();
+
+        LinkedList<Print> printers = new LinkedList<>();
+
+        switch (type.toLowerCase()){
+
+            case "print", "let" -> {
+
+                Object term = term_factory._createTerm(node, objects, printers);
+
+
+            }
+
+        }
+
+        for (Print printer : printers) {
+
+            Term value = printer.value();
+
+        }
 
 
 
