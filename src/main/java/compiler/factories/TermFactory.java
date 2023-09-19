@@ -3,12 +3,11 @@ package compiler.factories;
 import com.fasterxml.jackson.databind.JsonNode;
 import compiler.models.*;
 
-import java.util.HashMap;
 import java.util.LinkedList;
 
 public class TermFactory {
 
-    public Object _createTerm(JsonNode node, HashMap<Location, Object> objects, LinkedList<Print> printers){
+    public Object _createTerm(JsonNode node, LinkedList<Term> terms){
 
         String type_term = node.get("kind").textValue();
 
@@ -24,13 +23,13 @@ public class TermFactory {
                     parameters.add(_createParameterByNode(jsonNode))
                 );
 
-                Term term_function = (Term) _createTerm(node.get("value"), objects, printers);
+                Term term_function = (Term) _createTerm(node.get("value"), terms);
 
                 Location location = _createLocationByNode(node.get("location"));
 
                 Function function = new Function(parameters, term_function, location);
 
-                objects.put(location, function);
+                terms.add(function);
 
                 return function;
             }
@@ -39,15 +38,15 @@ public class TermFactory {
 
                 Parameter parameter = _createParameterByNode(node.get("name"));
 
-                Term value = (Term) _createTerm(node.get("value"), objects, printers);
+                Term value = (Term) _createTerm(node.get("value"), terms);
 
-                Term next = (Term) _createTerm(node.get("next"), objects, printers);
+                Term next = (Term) _createTerm(node.get("next"), terms);
 
                 Location location = _createLocationByNode(node.get("location"));
 
                 Let let = new Let(parameter, value, next, location);
 
-                objects.put(location, let);
+                terms.add(let);
 
                 return let;
 
@@ -55,17 +54,17 @@ public class TermFactory {
 
             case "binary" -> {
 
-                Term lhs = (Term) _createTerm(node.get("lhs"), objects, printers);
+                Term lhs = (Term) _createTerm(node.get("lhs"), terms);
 
                 Operator operator = OperatorFactory._returnOperator(node.get("op").textValue());
 
-                Term rhs = (Term) _createTerm(node.get("rhs"), objects, printers);
+                Term rhs = (Term) _createTerm(node.get("rhs"), terms);
 
                 Location location = _createLocationByNode(node.get("location"));
 
                 Binary binary = new Binary(lhs, operator, rhs, location);
 
-                objects.put(location, binary);
+                terms.add(binary);
 
                 return binary;
 
@@ -79,7 +78,7 @@ public class TermFactory {
 
                 Int int_ = new Int(value, location);
 
-                objects.put(location, int_);
+                terms.add(int_);
 
                 return int_;
 
@@ -93,7 +92,7 @@ public class TermFactory {
 
                 Var var = new Var(text, location);
 
-                objects.put(location, var);
+                terms.add(var);
 
                 return var;
 
@@ -101,14 +100,13 @@ public class TermFactory {
 
             case "print" -> {
 
-                Term value = (Term) _createTerm(node.get("value"), objects, printers);
+                Term value = (Term) _createTerm(node.get("value"), terms);
 
                 Location location = _createLocationByNode(node.get("location"));
 
                 Print print = new Print(value, location);
 
-                objects.put(location, print);
-                printers.add(print);
+                terms.add(print);
 
                 return print;
 
@@ -116,21 +114,21 @@ public class TermFactory {
 
             case "call" -> {
 
-                Term callee = (Term) _createTerm(node.get("callee"), objects, printers);
+                Term callee = (Term) _createTerm(node.get("callee"), terms);
 
                 LinkedList<Term> arguments = new LinkedList<>();
 
                 JsonNode node_array_arguments = node.get("arguments");
 
                 node_array_arguments.forEach(jsonNode ->
-                        arguments.add((Term) _createTerm(jsonNode, objects, printers))
+                        arguments.add((Term) _createTerm(jsonNode, terms))
                 );
 
                 Location location = _createLocationByNode(node.get("location"));
 
                 Call call = new Call(callee, arguments, location);
 
-                objects.put(location, call);
+                terms.add(call);
 
                 return call;
             }
@@ -143,24 +141,24 @@ public class TermFactory {
 
                 Str str = new Str(value, location);
 
-                objects.put(location, str);
+                terms.add(str);
 
                 return str;
             }
 
             case "if" -> {
 
-                Term condition = (Term) _createTerm(node.get("condition"), objects, printers);
+                Term condition = (Term) _createTerm(node.get("condition"), terms);
 
-                Term then = (Term) _createTerm(node.get("then"), objects, printers);
+                Term then = (Term) _createTerm(node.get("then"), terms);
 
-                Term otherwise = (Term) _createTerm(node.get("otherwise"), objects, printers);
+                Term otherwise = (Term) _createTerm(node.get("otherwise"), terms);
 
                 Location location = _createLocationByNode(node.get("location"));
 
                 If if_ =  new If(condition, then, otherwise, location);
 
-                objects.put(location, if_);
+                terms.add(if_);
 
                 return if_;
 
@@ -181,7 +179,7 @@ public class TermFactory {
         return new Parameter(text, location);
     }
 
-    private Location _createLocationByNode(JsonNode location_node){
+    public Location _createLocationByNode(JsonNode location_node){
 
         String start = location_node.get("start").toPrettyString();
         String end = location_node.get("end").toPrettyString();

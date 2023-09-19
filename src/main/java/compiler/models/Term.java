@@ -1,7 +1,11 @@
 package compiler.models;
 
-public interface Term {
+public interface Term{
 
     String toStringCompiler();
+
+    String returnTypeTerm();
+
+
 
 }

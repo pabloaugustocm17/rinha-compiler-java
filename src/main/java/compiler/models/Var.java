@@ -1,17 +1,19 @@
 package compiler.models;
 
-public class Var implements Term {
+public record Var(
+        String text,
+        Location location
+) implements Term {
 
-    private final String text;
-    private final Location location;
 
-    public Var(String text, Location location) {
-        this.text = text;
-        this.location = location;
-    }
 
     @Override
     public String toStringCompiler() {
         return this.text;
+    }
+
+    @Override
+    public String returnTypeTerm() {
+        return "var";
     }
 }

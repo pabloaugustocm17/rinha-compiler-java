@@ -2,17 +2,18 @@ package compiler.actions;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import compiler.annotations.CompilerPrinter;
 import compiler.factories.TermFactory;
-import compiler.models.Call;
-import compiler.models.Location;
-import compiler.models.Print;
-import compiler.models.Term;
+import compiler.models.*;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.List;
+import java.util.stream.Collectors;
+
 
 public class Interpreter {
 
@@ -23,32 +24,39 @@ public class Interpreter {
 
         TermFactory term_factory = new TermFactory();
 
-        String type = node.get("kind").textValue();
+        LinkedList<Term> terms = new LinkedList<>();
 
-        HashMap<Location, Object> objects = new HashMap<>();
+        File file = new File(
+                node.get("name").textValue(),
+                (Term) term_factory._createTerm(node.get("expression"), terms),
+                term_factory._createLocationByNode(node.get("location"))
+        );
 
-        LinkedList<Print> printers = new LinkedList<>();
 
-        switch (type.toLowerCase()){
+        List<Term> printers = _findPrinters(terms);
 
-            case "print", "let" -> {
+        printers.forEach(printer ->{
 
-                Object term = term_factory._createTerm(node, objects, printers);
+            Print print = ((Print) printer);
+            Term print_value = print.value();
+
+            switch (print_value.returnTypeTerm()){
+
+                case "call" -> {
+
+                    _interpretCall((Call) print_value, terms);
+
+                }
+
+
+                case "str", "int", "bool" -> print._execute();
+
+                default -> throw new RuntimeException("Tipo não existe");
 
 
             }
 
-        }
-
-        for (Print printer : printers) {
-
-            Term value = printer.value();
-
-        }
-
-
-
-
+        });
     }
 
     /**
@@ -75,5 +83,58 @@ public class Interpreter {
     }
 
     /* ---------------- PRIVATE METHODS ---------------- */
+
+    /**
+     *
+     * @param terms Termos achados na busca / Terms find in the research
+     * @return List<Print>
+     */
+    private List<Term> _findPrinters(LinkedList<Term> terms){
+
+        return terms
+                .parallelStream()
+                .filter(term -> term.getClass().isAnnotationPresent(CompilerPrinter.class))
+                .sorted()
+                .toList();
+
+    }
+
+    private Let _findTermByTextVar(String text, LinkedList<Term> terms){
+
+        return (Let) terms
+                .parallelStream()
+                .filter(term -> term.returnTypeTerm().equals("let"))
+                .filter(term -> ((Let) term).name().text().equals(text))
+                .toList().get(0);
+
+    }
+
+    private void _interpretCall(Call call, LinkedList<Term> terms){
+
+        Term callee = call.callee();
+
+        switch (callee.returnTypeTerm()){
+
+            case "var" -> {
+
+                Let let = _findTermByTextVar(((Var) callee).text(), terms);
+
+                Function function = (Function) let.value();
+
+                if(call.arguments().size() != function.parameters().size()){
+                    throw new RuntimeException("Paramêtros passados são divergentes");
+                }
+
+
+
+            }
+
+            default -> throw new RuntimeException("Tipo não existe");
+
+        }
+
+    }
+
+
 
 }

@@ -2,19 +2,21 @@ package compiler.models;
 
 import java.util.LinkedList;
 
-public class Call implements Term {
-    private Term callee;
-    private LinkedList<Term> arguments;
-    private Location location;
 
-    public Call(Term callee, LinkedList<Term> arguments, Location location) {
-        this.callee = callee;
-        this.arguments = arguments;
-        this.location = location;
-    }
+public record Call(
+        Term callee,
+        LinkedList<Term> arguments,
+        Location location
+) implements Term {
+
 
     @Override
     public String toStringCompiler() {
         return null;
+    }
+
+    @Override
+    public String returnTypeTerm() {
+        return "call";
     }
 }

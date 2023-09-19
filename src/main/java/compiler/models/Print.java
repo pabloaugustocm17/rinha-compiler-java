@@ -1,6 +1,5 @@
 package compiler.models;
 
-
 import compiler.annotations.CompilerPrinter;
 
 @CompilerPrinter
@@ -17,5 +16,10 @@ public record Print(Term value, Location location) implements Executor, Term {
     @Override
     public String toStringCompiler() {
         return this.value().toStringCompiler();
+    }
+
+    @Override
+    public String returnTypeTerm() {
+        return "print";
     }
 }
